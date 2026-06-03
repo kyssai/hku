@@ -138,9 +138,33 @@
 
       team_role_member: "Team Member",
 
+      team_role_application: "Team Member (Application Director)",
+
+      team_role_ai_director: "Team Member (AI Director)",
+
+      team_role_interview_director: "Team Member (Interview Director)",
+
+      team_role_cyber_security_director: "Team Member (Cyber Security Director)",
+
+      team_role_design_web3_director: "Team Member (Design and Web3 Director)",
+
       team_desc_mentor: "Project mentor and academic advisor.",
 
       team_desc_member: "Final year project team member.",
+
+      team_desc_cheung: "Final-year project team member responsible for developing the Android and iOS mobile applications.",
+
+      team_desc_chung:
+        "Final-year project team member and AI Director, primarily responsible for LLM development and communication architecture.",
+
+      team_desc_kwok:
+        "Final-year project team member and Interview Director, primarily responsible for interview development.",
+
+      team_desc_lau:
+        "Final-year project team member and Cyber Security Director, primarily responsible for attack and defense in our AI interview system.",
+
+      team_desc_lee:
+        "Final-year project team member and Design and Web3 Director, primarily responsible for website development and Web3 functionality.",
 
       contact_email_line: "Email: u3638360@connect.hku.hk",
 
@@ -321,9 +345,29 @@
 
       team_role_member: "組員",
 
+      team_role_application: "組員（應用程式總監）",
+
+      team_role_ai_director: "組員（AI 總監）",
+
+      team_role_interview_director: "組員（面試總監）",
+
+      team_role_cyber_security_director: "組員（網絡安全總監）",
+
+      team_role_design_web3_director: "組員（設計與 Web3 總監）",
+
       team_desc_mentor: "專題導師與學術顧問。",
 
       team_desc_member: "最終年度專題組員。",
+
+      team_desc_cheung: "最終年度專題組員，負責開發 Android 與 iOS 流動應用程式。",
+
+      team_desc_chung: "最終年度專題組員並擔任 AI 總監，主要負責大型語言模型（LLM）開發與通訊架構。",
+
+      team_desc_kwok: "最終年度專題組員並擔任面試總監，主要負責面試模組開發。",
+
+      team_desc_lau: "最終年度專題組員並擔任網絡安全總監，主要負責 AI 面試系統的攻防安全。",
+
+      team_desc_lee: "最終年度專題組員並擔任設計與 Web3 總監，主要負責網站開發與 Web3 功能。",
 
       contact_email_line: "電郵：u3638360@connect.hku.hk",
 
@@ -504,9 +548,29 @@
 
       team_role_member: "组员",
 
+      team_role_application: "组员（应用程序总监）",
+
+      team_role_ai_director: "组员（AI 总监）",
+
+      team_role_interview_director: "组员（面试总监）",
+
+      team_role_cyber_security_director: "组员（网络安全总监）",
+
+      team_role_design_web3_director: "组员（设计与 Web3 总监）",
+
       team_desc_mentor: "专题导师与学术顾问。",
 
       team_desc_member: "最终年度专题组员。",
+
+      team_desc_cheung: "最终年度专题组员，负责开发 Android 与 iOS 流动应用程序。",
+
+      team_desc_chung: "最终年度专题组员并担任 AI 总监，主要负责大型语言模型（LLM）开发与通讯架构。",
+
+      team_desc_kwok: "最终年度专题组员并担任面试总监，主要负责面试模块开发。",
+
+      team_desc_lau: "最终年度专题组员并担任网络安全总监，主要负责 AI 面试系统的攻防安全。",
+
+      team_desc_lee: "最终年度专题组员并担任设计与 Web3 总监，主要负责网站开发与 Web3 功能。",
 
       contact_email_line: "邮箱：u3638360@connect.hku.hk",
 
@@ -679,7 +743,17 @@
 
     });
 
+    document.dispatchEvent(new CustomEvent("fyp-lang-change", { detail: { lang: lang } }));
+
   }
+
+
+
+  window.fypApplyLang = function () {
+
+    applyLang(getLang());
+
+  };
 
 
 

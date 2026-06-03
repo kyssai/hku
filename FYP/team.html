@@ -47,18 +47,18 @@
 
       <div class="member-info card">
         <h3 data-i18n="h3_member_info">Member Information</h3>
-        <p><strong data-i18n="label_mentor">Mentor:</strong> Professor YIU SIU MING</p>
+        <p><strong data-i18n="label_mentor">Mentor:</strong> <span id="memberInfoMentorText">Professor YIU SIU MING</span></p>
         <p><strong data-i18n="label_team_member">Team member:</strong></p>
-        <ul>
-          <li>CHEUNG CHUN HANG (3036384309)</li>
-          <li>CHUNG YUE CHEE (3036384189)</li>
-          <li>KWOK WING HING (3036383587)</li>
-          <li>LAU CHIN KEI (3036383771)</li>
-          <li>LEE WAI WA (3036383604)</li>
+        <ul id="memberInfoTeamList" class="member-info-list">
+          <li><span class="member-info-name">CHEUNG CHUN HANG</span><span class="member-info-id"> (3036384309)</span></li>
+          <li><span class="member-info-name">CHUNG YUE CHEE</span><span class="member-info-id"> (3036384189)</span></li>
+          <li><span class="member-info-name">KWOK WING HING</span><span class="member-info-id"> (3036383587)</span></li>
+          <li><span class="member-info-name">LAU CHIN KEI</span><span class="member-info-id"> (3036383771)</span></li>
+          <li><span class="member-info-name">LEE WAI WA</span><span class="member-info-id"> (3036383604)</span></li>
         </ul>
       </div>
 
-      <div class="team-grid">
+      <div id="teamList" class="team-grid">
         <article class="team-card mentor-card">
           <span class="mentor-badge" data-i18n="team_badge_mentor">MENTOR</span>
           <img class="team-photo" src="IMG/men1.png" alt="Professor YIU SIU MING photo">
@@ -69,32 +69,32 @@
         <article class="team-card">
           <img class="team-photo" src="IMG/mem1.png" alt="CHEUNG CHUN HANG photo">
           <h3>CHEUNG CHUN HANG (3036384309)</h3>
-          <p class="team-role" data-i18n="team_role_member">Team Member</p>
-          <p data-i18n="team_desc_member">Final year project team member.</p>
+          <p class="team-role" data-i18n="team_role_application">Team Member (Application Director)</p>
+          <p data-i18n="team_desc_cheung">Final-year project team member responsible for developing the Android and iOS mobile applications.</p>
         </article>
         <article class="team-card">
           <img class="team-photo" src="IMG/mem2.png" alt="CHUNG YUE CHEE photo">
           <h3>CHUNG YUE CHEE (3036384189)</h3>
-          <p class="team-role" data-i18n="team_role_member">Team Member</p>
-          <p data-i18n="team_desc_member">Final year project team member.</p>
+          <p class="team-role" data-i18n="team_role_ai_director">Team Member (AI Director)</p>
+          <p data-i18n="team_desc_chung">Final-year project team member and AI Director, primarily responsible for LLM development and communication architecture.</p>
         </article>
         <article class="team-card">
           <img class="team-photo" src="IMG/mem3.png" alt="KWOK WING HING photo">
           <h3>KWOK WING HING (3036383587)</h3>
-          <p class="team-role" data-i18n="team_role_member">Team Member</p>
-          <p data-i18n="team_desc_member">Final year project team member.</p>
+          <p class="team-role" data-i18n="team_role_interview_director">Team Member (Interview Director)</p>
+          <p data-i18n="team_desc_kwok">Final-year project team member and Interview Director, primarily responsible for interview development.</p>
         </article>
         <article class="team-card">
           <img class="team-photo" src="IMG/mem4.png" alt="LAU CHIN KEI photo">
           <h3>LAU CHIN KEI (3036383771)</h3>
-          <p class="team-role" data-i18n="team_role_member">Team Member</p>
-          <p data-i18n="team_desc_member">Final year project team member.</p>
+          <p class="team-role" data-i18n="team_role_cyber_security_director">Team Member (Cyber Security Director)</p>
+          <p data-i18n="team_desc_lau">Final-year project team member and Cyber Security Director, primarily responsible for attack and defense in our AI interview system.</p>
         </article>
         <article class="team-card">
           <img class="team-photo" src="IMG/mem5.png" alt="LEE WAI WA photo">
           <h3>LEE WAI WA (3036383604)</h3>
-          <p class="team-role" data-i18n="team_role_member">Team Member</p>
-          <p data-i18n="team_desc_member">Final year project team member.</p>
+          <p class="team-role" data-i18n="team_role_design_web3_director">Team Member (Design and Web3 Director)</p>
+          <p data-i18n="team_desc_lee">Final-year project team member and Design and Web3 Director, primarily responsible for website development and Web3 functionality.</p>
         </article>
       </div>
     </section>
@@ -122,5 +122,33 @@
     </div>
   </footer>
   <script src="header-controls.js"></script>
+  <script src="script.js"></script>
+  <script>
+    (function () {
+      var list = document.getElementById("memberInfoTeamList");
+      if (!list) return;
+      var members = [
+        { name: "CHEUNG CHUN HANG", id: "3036384309" },
+        { name: "CHUNG YUE CHEE", id: "3036384189" },
+        { name: "KWOK WING HING", id: "3036383587" },
+        { name: "LAU CHIN KEI", id: "3036383771" },
+        { name: "LEE WAI WA", id: "3036383604" }
+      ];
+      if (list.querySelector(".member-info-id")) return;
+      list.innerHTML = "";
+      members.forEach(function (member) {
+        var li = document.createElement("li");
+        var nameSpan = document.createElement("span");
+        nameSpan.className = "member-info-name";
+        nameSpan.textContent = member.name;
+        var idSpan = document.createElement("span");
+        idSpan.className = "member-info-id";
+        idSpan.textContent = " (" + member.id + ")";
+        li.appendChild(nameSpan);
+        li.appendChild(idSpan);
+        list.appendChild(li);
+      });
+    })();
+  </script>
 </body>
 </html>

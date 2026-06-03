@@ -9,39 +9,48 @@
   const SNAPSHOT_FILE_NAME = "site-content-snapshot.json";
   const DEFAULT_TEAM = [
     {
-      name: "CHEUNG CHUN HANG (3036384309)",
-      role: "Team Member",
-      photo: "https://via.placeholder.com/320x320.png?text=Member+1",
-      description: "Final year project team member."
+      name: "CHEUNG CHUN HANG",
+      id: "3036384309",
+      role: "Team Member (Application Director)",
+      photo: "IMG/mem1.png",
+      description: "Final-year project team member responsible for developing the Android and iOS mobile applications."
     },
     {
-      name: "CHUNG YUE CHEE (3036384189)",
-      role: "Team Member",
-      photo: "https://via.placeholder.com/320x320.png?text=Member+2",
-      description: "Final year project team member."
+      name: "CHUNG YUE CHEE",
+      id: "3036384189",
+      role: "Team Member (AI Director)",
+      photo: "IMG/mem2.png",
+      description:
+        "Final-year project team member and AI Director, primarily responsible for LLM development and communication architecture."
     },
     {
-      name: "KWOK WING HING (3036383587)",
-      role: "Team Member",
-      photo: "https://via.placeholder.com/320x320.png?text=Member+3",
-      description: "Final year project team member."
+      name: "KWOK WING HING",
+      id: "3036383587",
+      role: "Team Member (Interview Director)",
+      photo: "IMG/mem3.png",
+      description:
+        "Final-year project team member and Interview Director, primarily responsible for interview development."
     },
     {
-      name: "LAU CHIN KEI (3036383771)",
-      role: "Team Member",
-      photo: "https://via.placeholder.com/320x320.png?text=Member+4",
-      description: "Final year project team member."
+      name: "LAU CHIN KEI",
+      id: "3036383771",
+      role: "Team Member (Cyber Security Director)",
+      photo: "IMG/mem4.png",
+      description:
+        "Final-year project team member and Cyber Security Director, primarily responsible for attack and defense in our AI interview system."
     },
     {
-      name: "LEE WAI WA (3036383604)",
-      role: "Team Member",
-      photo: "https://via.placeholder.com/320x320.png?text=Member+5",
-      description: "Final year project team member."
+      name: "LEE WAI WA",
+      id: "3036383604",
+      role: "Team Member (Design and Web3 Director)",
+      photo: "IMG/mem5.png",
+      description:
+        "Final-year project team member and Design and Web3 Director, primarily responsible for website development and Web3 functionality."
     },
     {
       name: "Professor YIU SIU MING",
       role: "Mentor",
-      photo: "https://via.placeholder.com/320x320.png?text=Mentor",
+      photo: "IMG/men1.png",
       description: "Project mentor and academic advisor."
     }
   ];
@@ -66,6 +75,74 @@
     if (!el) return;
     el.textContent = text;
     el.style.color = isError ? "#dc2626" : "#5f6b85";
+  }
+
+  function parseMemberIdentity(member) {
+    const rawName = (member && member.name) || "";
+    const explicitId = member && member.id ? String(member.id).trim() : "";
+    const match = rawName.match(/^(.+?)\s*\((\d+)\)\s*$/);
+    if (explicitId) {
+      const cleanName = rawName.replace(/\s*\([^)]*\)\s*$/, "").trim() || rawName;
+      return { name: cleanName, id: explicitId };
+    }
+    if (match) {
+      return { name: match[1].trim(), id: match[2] };
+    }
+    return { name: rawName.trim(), id: "" };
+  }
+
+  function formatMemberCardName(member) {
+    const identity = parseMemberIdentity(member);
+    if (identity.id) return identity.name + " (" + identity.id + ")";
+    return identity.name;
+  }
+
+  function formatMemberInfoLine(member) {
+    return formatMemberCardName(member);
+  }
+
+  function isMentorMember(member) {
+    return (member && member.role ? member.role : "").toLowerCase().includes("mentor");
+  }
+
+  function getDefaultStudents() {
+    return DEFAULT_TEAM.filter(function (member) {
+      return !isMentorMember(member);
+    });
+  }
+
+  function getDefaultMentor() {
+    return (
+      DEFAULT_TEAM.find(isMentorMember) ||
+      DEFAULT_TEAM[DEFAULT_TEAM.length - 1]
+    );
+  }
+
+  function reorderTeamMembers(members) {
+    if (!Array.isArray(members) || members.length !== DEFAULT_TEAM.length) {
+      return DEFAULT_TEAM.slice();
+    }
+    const mentor =
+      members.find(isMentorMember) || getDefaultMentor();
+    const students = getDefaultStudents().map(function (def) {
+      const defIdentity = parseMemberIdentity(def);
+      const found = members.find(function (member) {
+        if (isMentorMember(member)) return false;
+        const identity = parseMemberIdentity(member);
+        if (defIdentity.id && identity.id && identity.id === defIdentity.id) return true;
+        return identity.name.toUpperCase() === defIdentity.name.toUpperCase();
+      });
+      if (!found) return Object.assign({}, def);
+      const foundIdentity = parseMemberIdentity(found);
+      return Object.assign({}, def, found, {
+        name: foundIdentity.name || defIdentity.name,
+        id: defIdentity.id || foundIdentity.id || "",
+        role: found.role || def.role,
+        photo: found.photo || def.photo,
+        description: found.description || def.description
+      });
+    });
+    return students.concat([mentor]);
   }
 
   function escapeHtml(text) {
@@ -793,19 +870,120 @@
       return localStorage.getItem(AUTH_KEY) === "true";
     }
 
+    function isCheungMember(member) {
+      return (member.name || "").indexOf("CHEUNG CHUN HANG") !== -1;
+    }
+
+    function isChungMember(member) {
+      return (member.name || "").indexOf("CHUNG YUE CHEE") !== -1;
+    }
+
+    function isKwokMember(member) {
+      return (member.name || "").indexOf("KWOK WING HING") !== -1;
+    }
+
+    function isLauMember(member) {
+      return (member.name || "").indexOf("LAU CHIN KEI") !== -1;
+    }
+
+    function isLeeMember(member) {
+      return (member.name || "").indexOf("LEE WAI WA") !== -1;
+    }
+
+    function isGenericMemberDescription(description, member) {
+      const oldDesc = (description || "").toLowerCase();
+      if (!oldDesc || oldDesc === "final year project team member.") return true;
+      if (isCheungMember(member)) {
+        return oldDesc.indexOf("apk") !== -1 || oldDesc.indexOf("ios version") !== -1;
+      }
+      return false;
+    }
+
+    function getMemberDescKey(member) {
+      if ((member.role || "").toLowerCase().includes("mentor")) return "team_desc_mentor";
+      if (isCheungMember(member)) return "team_desc_cheung";
+      if (isChungMember(member)) return "team_desc_chung";
+      if (isKwokMember(member)) return "team_desc_kwok";
+      if (isLauMember(member)) return "team_desc_lau";
+      if (isLeeMember(member)) return "team_desc_lee";
+      return "team_desc_member";
+    }
+
+    function getMemberRoleKey(member) {
+      if ((member.role || "").toLowerCase().includes("mentor")) return "team_role_mentor";
+      if (isCheungMember(member)) return "team_role_application";
+      if (isChungMember(member)) return "team_role_ai_director";
+      if (isKwokMember(member)) return "team_role_interview_director";
+      if (isLauMember(member)) return "team_role_cyber_security_director";
+      if (isLeeMember(member)) return "team_role_design_web3_director";
+      return "team_role_member";
+    }
+
+    function syncFeaturedTeamMember(members, isMatch) {
+      const featuredDefault = DEFAULT_TEAM.find(isMatch);
+      if (!featuredDefault) return { members: members, changed: false };
+      let changed = false;
+      const synced = members.map(function (member) {
+        if (!isMatch(member)) return member;
+        const looksGeneric = isGenericMemberDescription(member.description, member);
+        const roleNeedsUpdate =
+          (member.role || "").toLowerCase() !== (featuredDefault.role || "").toLowerCase();
+        const idNeedsUpdate = !(member.id || "").trim() && (featuredDefault.id || "").trim();
+        if (!looksGeneric && !roleNeedsUpdate && !idNeedsUpdate) return member;
+        changed = true;
+        return Object.assign({}, member, {
+          name: parseMemberIdentity(featuredDefault).name,
+          id: (member.id || "").trim() || featuredDefault.id || "",
+          description: looksGeneric ? featuredDefault.description : member.description,
+          role: roleNeedsUpdate ? featuredDefault.role : member.role
+        });
+      });
+      return { members: synced, changed: changed };
+    }
+
+    function syncFeaturedTeamMembers(members) {
+      let synced = members;
+      let changed = false;
+      [isCheungMember, isChungMember, isKwokMember, isLauMember, isLeeMember].forEach(function (isMatch) {
+        const result = syncFeaturedTeamMember(synced, isMatch);
+        synced = result.members;
+        if (result.changed) changed = true;
+      });
+      if (changed) {
+        localStorage.setItem(TEAM_KEY, JSON.stringify(synced));
+      }
+      return synced;
+    }
+
     function readTeamMembers() {
       const stored = localStorage.getItem(TEAM_KEY);
-      if (!stored) return DEFAULT_TEAM;
+      if (!stored) return DEFAULT_TEAM.slice();
       try {
         const parsed = JSON.parse(stored);
-        if (!Array.isArray(parsed) || parsed.length !== DEFAULT_TEAM.length) return DEFAULT_TEAM;
-        return parsed;
+        if (!Array.isArray(parsed) || parsed.length !== DEFAULT_TEAM.length) {
+          localStorage.removeItem(TEAM_KEY);
+          return DEFAULT_TEAM.slice();
+        }
+        const synced = reorderTeamMembers(syncFeaturedTeamMembers(parsed));
+        localStorage.setItem(TEAM_KEY, JSON.stringify(synced));
+        return synced;
       } catch (error) {
-        return DEFAULT_TEAM;
+        return DEFAULT_TEAM.slice();
+      }
+    }
+
+
+    function applyTeamPageLang() {
+      if (typeof window.fypApplyLang === "function") {
+        window.fypApplyLang();
       }
     }
 
     function renderTeamCards(members) {
+      if (!localStorage.getItem(TEAM_KEY) && teamList.querySelector(".team-card")) {
+        applyTeamPageLang();
+        return;
+      }
       teamList.innerHTML = "";
       const orderedMembers = members.slice().sort(function (a, b) {
         const aIsMentor = (a.role || "").toLowerCase().includes("mentor") ? 1 : 0;
@@ -827,21 +1005,24 @@
         img.alt = member.name + " photo";
 
         const name = document.createElement("h3");
-        name.textContent = member.name;
+        name.textContent = formatMemberCardName(member);
 
         const role = document.createElement("p");
         role.className = "team-role";
         if ((member.role || "").toLowerCase().includes("mentor")) {
           role.classList.add("mentor-role");
         }
+        role.setAttribute("data-i18n", getMemberRoleKey(member));
         role.textContent = member.role;
 
         const desc = document.createElement("p");
+        desc.setAttribute("data-i18n", getMemberDescKey(member));
         desc.textContent = member.description;
 
         if ((member.role || "").toLowerCase().includes("mentor")) {
           const badge = document.createElement("span");
           badge.className = "mentor-badge";
+          badge.setAttribute("data-i18n", "team_badge_mentor");
           badge.textContent = "MENTOR";
           card.appendChild(badge);
         }
@@ -852,23 +1033,43 @@
         card.appendChild(desc);
         teamList.appendChild(card);
       });
+      applyTeamPageLang();
+    }
+
+    function appendMemberInfoListItem(listEl, member) {
+      const identity = parseMemberIdentity(member);
+      const li = document.createElement("li");
+      const nameSpan = document.createElement("span");
+      nameSpan.className = "member-info-name";
+      nameSpan.textContent = identity.name;
+      li.appendChild(nameSpan);
+      if (identity.id) {
+        const idSpan = document.createElement("span");
+        idSpan.className = "member-info-id";
+        idSpan.textContent = " (" + identity.id + ")";
+        li.appendChild(idSpan);
+      }
+      listEl.appendChild(li);
     }
 
     function renderMemberInfo(members) {
       if (!memberInfoMentorText || !memberInfoTeamList) return;
-      const mentor = members.find(function (member) {
-        return (member.role || "").toLowerCase().includes("mentor");
-      });
-      const teamMembers = members.filter(function (member) {
-        return !(member.role || "").toLowerCase().includes("mentor");
+      const mentor = members.find(isMentorMember) || getDefaultMentor();
+      const teamMembers = getDefaultStudents().map(function (def) {
+        const defIdentity = parseMemberIdentity(def);
+        const found = members.find(function (member) {
+          if (isMentorMember(member)) return false;
+          const identity = parseMemberIdentity(member);
+          if (defIdentity.id && identity.id && identity.id === defIdentity.id) return true;
+          return identity.name.toUpperCase() === defIdentity.name.toUpperCase();
+        });
+        return found ? Object.assign({}, def, found, { id: defIdentity.id }) : def;
       });
 
-      memberInfoMentorText.textContent = mentor ? mentor.name : "N/A";
+      memberInfoMentorText.textContent = mentor ? parseMemberIdentity(mentor).name : "N/A";
       memberInfoTeamList.innerHTML = "";
       teamMembers.forEach(function (member) {
-        const li = document.createElement("li");
-        li.textContent = member.name;
-        memberInfoTeamList.appendChild(li);
+        appendMemberInfoListItem(memberInfoTeamList, member);
       });
     }
 
@@ -881,7 +1082,7 @@
       });
       memberInfoMentorInput.value = mentor ? mentor.name : "";
       memberInfoTeamInput.value = teamMembers.map(function (member) {
-        return member.name;
+        return formatMemberInfoLine(member);
       }).join("\n");
       memberInfoEditorArea.classList.remove("hidden");
     }
@@ -906,22 +1107,37 @@
         return !(member.role || "").toLowerCase().includes("mentor");
       });
 
-      const updated = [{
-        name: mentorName,
-        role: "Mentor",
-        photo: oldMentor.photo || "https://via.placeholder.com/320x320.png?text=Mentor",
-        description: oldMentor.description || "Project mentor and academic advisor."
-      }];
+      const updated = [];
 
       for (let i = 0; i < desiredCount; i += 1) {
-        const baseMember = oldTeamMembers[i] || DEFAULT_TEAM[i];
-        updated.push({
+        const defaultMember = getDefaultStudents()[i] || DEFAULT_TEAM[i] || {};
+        const baseMember =
+          oldTeamMembers.find(function (member) {
+            const identity = parseMemberIdentity(member);
+            const defIdentity = parseMemberIdentity(defaultMember);
+            if (defIdentity.id && identity.id && identity.id === defIdentity.id) return true;
+            return identity.name.toUpperCase() === defIdentity.name.toUpperCase();
+          }) || defaultMember;
+        const parsed = parseMemberIdentity({
           name: teamNames[i],
-          role: "Team Member",
-          photo: baseMember.photo || "https://via.placeholder.com/320x320.png?text=Member+" + (i + 1),
-          description: baseMember.description || "Final year project team member."
+          id: baseMember.id || defaultMember.id
+        });
+        const defaultParsed = parseMemberIdentity(defaultMember);
+        updated.push({
+          name: parsed.name || defaultParsed.name,
+          id: parsed.id || defaultParsed.id || "",
+          role: baseMember.role || defaultMember.role || "Team Member",
+          photo: baseMember.photo || defaultMember.photo || "https://via.placeholder.com/320x320.png?text=Member+" + (i + 1),
+          description: baseMember.description || defaultMember.description || "Final year project team member."
         });
       }
+
+      updated.push({
+        name: mentorName,
+        role: "Mentor",
+        photo: oldMentor.photo || getDefaultMentor().photo || "IMG/men1.png",
+        description: oldMentor.description || getDefaultMentor().description || "Project mentor and academic advisor."
+      });
 
       localStorage.setItem(TEAM_KEY, JSON.stringify(updated));
       return updated;
@@ -1017,11 +1233,15 @@
         const photo = document.getElementById("member-photo-" + i).value.trim();
         const uploadedPhoto = uploadedPhotoMap[i];
         const description = document.getElementById("member-description-" + i).value.trim();
+        const defaultMember = DEFAULT_TEAM[i] || {};
+        const parsed = parseMemberIdentity({ name: name, id: defaultMember.id });
+        const isMentor = (role || defaultMember.role || "").toLowerCase().includes("mentor");
         edited.push({
-          name: name || "Member " + (i + 1),
-          role: role || "Team Member",
-          photo: uploadedPhoto || photo || "https://via.placeholder.com/320x320.png?text=Member+" + (i + 1),
-          description: description || "No description provided yet."
+          name: parsed.name || (isMentor ? name : "Member " + (i + 1)),
+          id: isMentor ? "" : parsed.id || defaultMember.id || "",
+          role: role || defaultMember.role || "Team Member",
+          photo: uploadedPhoto || photo || defaultMember.photo || "https://via.placeholder.com/320x320.png?text=Member+" + (i + 1),
+          description: description || defaultMember.description || "No description provided yet."
         });
       }
       return edited;
@@ -1029,15 +1249,19 @@
 
     function updateAuthUI() {
       const loggedIn = isLoggedIn();
-      editToggleBtn.classList.toggle("hidden", !loggedIn);
-      editToggleBtn.disabled = !loggedIn;
-      editToggleBtn.title = loggedIn ? "" : "Please login first";
+      if (editToggleBtn) {
+        editToggleBtn.classList.toggle("hidden", !loggedIn);
+        editToggleBtn.disabled = !loggedIn;
+        editToggleBtn.title = loggedIn ? "" : "Please login first";
+      }
       if (memberInfoEditBtn) {
         memberInfoEditBtn.classList.toggle("hidden", !loggedIn);
         memberInfoEditBtn.disabled = !loggedIn;
         memberInfoEditBtn.title = loggedIn ? "" : "Please login first";
       }
-      logoutBtn.classList.toggle("hidden", !loggedIn);
+      if (logoutBtn) {
+        logoutBtn.classList.toggle("hidden", !loggedIn);
+      }
       setMessage(
         memberInfoHint,
         loggedIn ? "You can edit member information now." : "Please login to edit member information.",
@@ -1050,36 +1274,42 @@
       );
       if (!loggedIn) {
         if (memberInfoEditorArea) memberInfoEditorArea.classList.add("hidden");
-        editorArea.classList.add("hidden");
+        if (editorArea) editorArea.classList.add("hidden");
       }
     }
 
     let members = readTeamMembers();
     renderTeamCards(members);
     renderMemberInfo(members);
-    renderTeamEditor(members);
-
-    editToggleBtn.addEventListener("click", function () {
-      if (!isLoggedIn()) return;
-      members = readTeamMembers();
+    if (editorFields) {
       renderTeamEditor(members);
-      editorArea.classList.toggle("hidden");
-    });
+    }
 
-    saveBtn.addEventListener("click", function () {
-      if (!isLoggedIn()) return;
-      const edited = collectEditedMembers();
-      localStorage.setItem(TEAM_KEY, JSON.stringify(edited));
-      members = edited;
-      renderTeamCards(members);
-      renderMemberInfo(members);
-      editorArea.classList.add("hidden");
-      setMessage(editorHint, "Team member information updated.", false);
-    });
+    document.addEventListener("fyp-lang-change", applyTeamPageLang);
 
-    cancelBtn.addEventListener("click", function () {
-      editorArea.classList.add("hidden");
-    });
+    if (editToggleBtn && editorArea && saveBtn && cancelBtn) {
+      editToggleBtn.addEventListener("click", function () {
+        if (!isLoggedIn()) return;
+        members = readTeamMembers();
+        renderTeamEditor(members);
+        editorArea.classList.toggle("hidden");
+      });
+
+      saveBtn.addEventListener("click", function () {
+        if (!isLoggedIn()) return;
+        const edited = collectEditedMembers();
+        localStorage.setItem(TEAM_KEY, JSON.stringify(edited));
+        members = edited;
+        renderTeamCards(members);
+        renderMemberInfo(members);
+        editorArea.classList.add("hidden");
+        setMessage(editorHint, "Team member information updated.", false);
+      });
+
+      cancelBtn.addEventListener("click", function () {
+        editorArea.classList.add("hidden");
+      });
+    }
 
     if (memberInfoEditBtn) {
       memberInfoEditBtn.addEventListener("click", function () {
@@ -1107,11 +1337,13 @@
       });
     }
 
-    logoutBtn.addEventListener("click", function () {
-      localStorage.removeItem(AUTH_KEY);
-      window.dispatchEvent(new Event("auth-changed"));
-      updateAuthUI();
-    });
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", function () {
+        localStorage.removeItem(AUTH_KEY);
+        window.dispatchEvent(new Event("auth-changed"));
+        updateAuthUI();
+      });
+    }
 
     updateAuthUI();
   }

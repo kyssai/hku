@@ -110,7 +110,16 @@
               <td data-i18n="prog_r3_d1">May 5, 2026</td>
             </tr>
             <tr>
-              <td data-i18n="prog_r4_task">Interim Report and Presentation</td>
+              <td class="task-cell">
+                <div class="task-title" data-i18n="prog_r4_task">Interim Report and Presentation</div>
+                <a
+                  id="pdf-interim"
+                  class="download-link"
+                  href="Source/Interim%20Report.pdf"
+                  download="Interim Report.pdf"
+                  data-i18n="label_download_pdf"
+                >Download PDF</a>
+              </td>
               <td data-i18n="prog_r4_d1">June 1, 2026</td>
             </tr>
             <tr>
@@ -226,6 +235,10 @@
       var c = document.getElementById("pdf-ppr2");
       if (c && typeof window.fypAsset === "function") {
         c.href = fypAsset("Source/Project%20Progress%20Updates%202.pdf");
+      }
+      var d = document.getElementById("pdf-interim");
+      if (d && typeof window.fypAsset === "function") {
+        d.href = fypAsset("Source/Interim%20Report.pdf");
       }
       var v = document.getElementById("video-src-ppr1");
       var vp = document.getElementById("video-ppr1");
