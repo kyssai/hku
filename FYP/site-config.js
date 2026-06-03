@@ -1,23 +1,50 @@
-/**
- * 部署到網站伺服器時的路徑設定 / Server deployment path config
- *
- * • 留空 ""：使用「相對於目前網頁」的路徑（建議多數情況）
- *   只要上傳時保持與本機相同的資料夾結構（Source 與 progress.html 同層），
- *   連結會自動變成 https://你的網域/.../Source/檔名.pdf
- *
- * • 若網站固定掛在子路徑（例如 https://example.com/courses/fyp/），可設為
- *   "/courses/fyp"（前面加 /，不要結尾斜線）
- *   則 PDF 會指向 /courses/fyp/Source/Detailed%20Project%20Proposal.pdf
- */
-window.FYP_SITE_BASE = "";
-
-/**
- * @param {string} relPath e.g. "Source/file.pdf"
- * @returns {string} URL path for href
- */
-window.fypAsset = function (relPath) {
-  relPath = (relPath || "").replace(/^\//, "");
-  var b = (window.FYP_SITE_BASE || "").replace(/\/$/, "");
-  if (!b) return relPath;
-  return b + "/" + relPath;
-};
+/**
+ * 部署路徑設定 / Deployment path config
+ *
+ * 你的 GitHub Pages 範例：
+ *   https://kyssai.github.io/hku/FYP/team.html
+ * 網站根路徑為 /hku/FYP（會自動偵測，一般無需手動設定）
+ *
+ * 若自動偵測失效，可改為：
+ *   window.FYP_SITE_BASE = "/hku/FYP";
+ */
+window.FYP_SITE_BASE = "";
+
+window.fypDetectSiteBase = function () {
+  var manual = (window.FYP_SITE_BASE || "").replace(/\/$/, "");
+  if (manual) return manual;
+  var path = window.location.pathname || "";
+  if (/\/[^/]+\.html$/i.test(path)) {
+    return path.replace(/\/[^/]+\.html$/i, "");
+  }
+  return path.replace(/\/$/, "") || "";
+};
+
+/**
+ * @param {string} relPath e.g. "IMG/mem1.png" or "Source/file.pdf"
+ * @returns {string} URL path for href/src
+ */
+window.fypAsset = function (relPath) {
+  relPath = (relPath || "").replace(/^\//, "");
+  var base = window.fypDetectSiteBase();
+  if (!base) return relPath;
+  return base + "/" + relPath;
+};
+
+function fypFixAssetPaths() {
+  document.querySelectorAll("img[src], a[href], video source[src]").forEach(function (el) {
+    var attr = el.tagName === "SOURCE" ? "src" : el.getAttribute("href") ? "href" : "src";
+    var raw = el.getAttribute(attr);
+    if (!raw || /^https?:\/\//i.test(raw) || raw.indexOf("data:") === 0) return;
+    if (/^(IMG\/|img\/|Source\/)/.test(raw)) {
+      el.setAttribute(attr, window.fypAsset(raw));
+    }
+  });
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", fypFixAssetPaths);
+} else {
+  fypFixAssetPaths();
+}
+
