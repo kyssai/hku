@@ -101,6 +101,43 @@
     return formatMemberCardName(member);
   }
 
+  function findDefaultTeamMember(member) {
+    const identity = parseMemberIdentity(member);
+    return DEFAULT_TEAM.find(function (def) {
+      if (isMentorMember(def) !== isMentorMember(member)) return false;
+      const defIdentity = parseMemberIdentity(def);
+      if (identity.id && defIdentity.id && identity.id === defIdentity.id) return true;
+      return identity.name.toUpperCase() === defIdentity.name.toUpperCase();
+    });
+  }
+
+  function isValidTeamPhoto(photo) {
+    const value = (photo || "").trim();
+    if (!value) return false;
+    if (value.indexOf("placeholder.com") !== -1) return false;
+    if (/^IMG\//i.test(value)) return true;
+    return /^https?:\/\//i.test(value);
+  }
+
+  function resolveMemberPhoto(member) {
+    const def = findDefaultTeamMember(member);
+    const raw = (member && member.photo ? member.photo : "").trim();
+    const photo = isValidTeamPhoto(raw) ? raw : def && def.photo ? def.photo : "IMG/mem1.png";
+    if (/^IMG\//i.test(photo) && typeof window.fypAsset === "function") {
+      return window.fypAsset(photo);
+    }
+    return photo;
+  }
+
+  function normalizeTeamPhotos(members) {
+    return members.map(function (member) {
+      const def = findDefaultTeamMember(member);
+      const raw = (member.photo || "").trim();
+      const photo = isValidTeamPhoto(raw) ? raw : def && def.photo ? def.photo : member.photo;
+      return Object.assign({}, member, { photo: photo || (def && def.photo) || "" });
+    });
+  }
+
   function isMentorMember(member) {
     return (member && member.role ? member.role : "").toLowerCase().includes("mentor");
   }
@@ -138,11 +175,11 @@
         name: foundIdentity.name || defIdentity.name,
         id: defIdentity.id || foundIdentity.id || "",
         role: found.role || def.role,
-        photo: found.photo || def.photo,
+        photo: isValidTeamPhoto(found.photo) ? found.photo : def.photo,
         description: found.description || def.description
       });
     });
-    return students.concat([mentor]);
+    return normalizeTeamPhotos(students.concat([mentor]));
   }
 
   function escapeHtml(text) {
@@ -979,8 +1016,19 @@
       }
     }
 
+    function applyStaticTeamCardAssets() {
+      teamList.querySelectorAll(".team-photo").forEach(function (img) {
+        const src = img.getAttribute("src");
+        if (!src) return;
+        if (typeof window.fypAsset === "function") {
+          img.src = window.fypAsset(src);
+        }
+      });
+    }
+
     function renderTeamCards(members) {
-      if (!localStorage.getItem(TEAM_KEY) && teamList.querySelector(".team-card")) {
+      if (teamList.querySelector(".team-card")) {
+        applyStaticTeamCardAssets();
         applyTeamPageLang();
         return;
       }
@@ -1001,8 +1049,8 @@
 
         const img = document.createElement("img");
         img.className = "team-photo";
-        img.src = member.photo || "https://via.placeholder.com/320x320.png?text=Member";
-        img.alt = member.name + " photo";
+        img.src = resolveMemberPhoto(member);
+        img.alt = parseMemberIdentity(member).name + " photo";
 
         const name = document.createElement("h3");
         name.textContent = formatMemberCardName(member);
